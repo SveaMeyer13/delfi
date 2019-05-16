@@ -18,7 +18,7 @@ def MyLogSumExp(x, axis=None):
 
 class NeuralNet(object):
     def __init__(self, n_inputs, n_outputs, n_components=1, n_filters=[],
-                 n_hiddens=[10, 10], n_rnn=None, impute_missing=True, seed=None,
+                 n_hiddens=[10, 10], n_rnn=None, impute_missing='single', seed=None,
                  svi=True):
         """Initialize a mixture density network with custom layers
 
@@ -94,10 +94,13 @@ class NeuralNet(object):
             (None, *self.n_inputs), input_var=self.stats)
 
         # learn replacement values
-        if self.impute_missing:
+        if self.impute_missing == 'single':
             self.layer['missing'] = dl.ImputeMissingLayer(last(self.layer),
-                                                          n_inputs=self.n_inputs)
-        else:
+                                                          n_inputs=(1, ))
+        elif self.impute_missing == 'all':
+            self.layer['missing'] = dl.ImputeMissingLayer(last(self.layer),
+                                                           n_inputs=self.n_inputs)
+        elif self.impute_missing == 'replace':
             self.layer['missing'] = dl.ReplaceMissingLayer(last(self.layer),
                                                            n_inputs=self.n_inputs)
 
